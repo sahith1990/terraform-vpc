@@ -1,6 +1,9 @@
 locals {
     az_names    = data.aws_availability_zones.azs.names
     pub_sub_ids = aws_subnet.public.*.id
+    private_sub_ids = aws_subnet.private.*.id
+    nat_gateway_ids = aws_nat_gateway.nat.*.id
+    route_table_ids = aws_route_table.PrivateRouteTable.*.id
 }
 
 resource "aws_subnet" "public" {
@@ -24,7 +27,7 @@ resource "aws_internet_gateway" "igw" {
   }
 }
 
-resource "aws_route_table" "prt" {
+resource "aws_route_table" "PublicRouteTable" {
   vpc_id = aws_vpc.ecommerce-vpc.id
 
   route {
@@ -40,5 +43,5 @@ resource "aws_route_table" "prt" {
 resource "aws_route_table_association" "pub_sub_association" {
   count          = length(slice(local.az_names, 0 ,3))
   subnet_id      = local.pub_sub_ids[count.index]
-  route_table_id = aws_route_table.prt.id
+  route_table_id = aws_route_table.PublicRouteTable.id
 }
